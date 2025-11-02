@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Generator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { background: #f0f2f5; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #333; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background: #007bff; color: white; }
+        .summary { background: #f8f9fa; padding: 15px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Invoice Generator - INR</h1>
+        
+        <div class="form-group">
+            <label>Company Name:</label>
+            <input type="text" id="company" value="Your Company">
+        </div>
+        
+        <div class="form-group">
+            <label>Client Name:</label>
+            <input type="text" id="client" value="ABC Client">
+        </div>
+        
+        <h3>Items:</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Qty</th>
+                    <th>Price (₹)</th>
+                    <th>Total (₹)</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="items">
+                <tr>
+                    <td><input type="text" value="Product 1"></td>
+                    <td><input type="number" value="2" class="qty"></td>
+                    <td><input type="number" value="1000" class="price"></td>
+                    <td class="total">2000.00</td>
+                    <td><button onclick="removeItem(this)">Remove</button></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <button onclick="addItem()">Add Item</button>
+        
+        <div class="form-group">
+            <label>Tax Rate (%):</label>
+            <input type="number" id="tax" value="18">
+        </div>
+        
+        <div class="summary">
+            <h3>Invoice Summary:</h3>
+            <p>Subtotal: ₹<span id="subtotal">2000.00</span></p>
+            <p>Tax: ₹<span id="taxAmount">360.00</span></p>
+            <p><strong>Total: ₹<span id="finalTotal">2360.00</span></strong></p>
+        </div>
+        
+        <button onclick="updateTotals()">Update Totals</button>
+        <button onclick="printInvoice()">Print Invoice</button>
+    </div>
+
+    <script>
+        function addItem() {
+            const itemsTable = document.getElementById('items');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td><input type="text" value="New Product"></td>
+                <td><input type="number" value="1" class="qty"></td>
+                <td><input type="number" value="500" class="price"></td>
+                <td class="total">500.00</td>
+                <td><button onclick="removeItem(this)">Remove</button></td>
+            `;
+            itemsTable.appendChild(newRow);
+            updateTotals();
+        }
+
+        function removeItem(button) {
+            button.closest('tr').remove();
+            updateTotals();
+        }
+
+        function updateTotals() {
+            let subtotal = 0;
+            document.querySelectorAll('#items tr').forEach(row => {
+                const qty = parseFloat(row.querySelector('.qty').value) || 0;
+                const price = parseFloat(row.querySelector('.price').value) || 0;
+                const total = qty * price;
+                row.querySelector('.total').textContent = total.toFixed(2);
+                subtotal += total;
+            });
+
+            const taxRate = parseFloat(document.getElementById('tax').value) || 0;
+            const taxAmount = subtotal * (taxRate / 100);
+            const finalTotal = subtotal + taxAmount;
+
+            document.getElementById('subtotal').textContent = subtotal.toFixed(2);
+            document.getElementById('taxAmount').textContent = taxAmount.toFixed(2);
+            document.getElementById('finalTotal').textContent = finalTotal.toFixed(2);
+        }
+
+        function printInvoice() {
+            window.print();
+        }
+
+        // Event listeners for auto-update
+        document.addEventListener('input', function(e) {
+            if (e.target.classList.contains('qty') || e.target.classList.contains('price')) {
+                updateTotals();
+            }
+        });
+
+        // Initialize
+        updateTotals();
+    </script>
+</body>
+</html>
